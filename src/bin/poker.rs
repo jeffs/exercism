@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::HashSet;
 use std::str::FromStr;
 
@@ -72,6 +73,7 @@ impl FromStr for Card {
     }
 }
 
+#[derive(Eq, PartialEq)]
 struct Hand {
     cards: HashSet<Card>,
 }
@@ -94,23 +96,36 @@ impl FromStr for Hand {
     }
 }
 
+impl PartialOrd for Hand {
+    fn partial_cmp(&self, _rhs: &Self) -> Option<Ordering> {
+        todo!()
+    }
+}
+
+fn count_winners<T: PartialOrd>(items: &[T]) -> usize {
+    for i in 1..items.len() {
+        if let Some(Ordering::Greater) = items[i - 1].partial_cmp(&items[i]) {
+            return i;
+        }
+    }
+    items.len()
+}
+
 /// Given a list of poker hands, return a list of those hands which win.
 ///
 /// Note the type signature: this function should return _the same_ reference to
 /// the winning hand(s) as were passed in, not reconstructed strings which happen to be equal.
-pub fn winning_hands<'a>(hand_strings: &[&'a str]) -> Vec<&'a str> {
-    let hands: Vec<Hand> = hand_strings
+pub fn winning_hands<'a>(hands: &[&'a str]) -> Vec<&'a str> {
+    let mut pairs: Vec<(usize, Hand)> = hands
         .iter()
         .map(|s| s.parse().expect("bad hand"))
-        .collect();
-    let rank = match hands.iter().map(|h| h.rank()).max() {
-        Some(rank) => rank,
-        None => return Vec::new(),
-    };
-    hands
-        .iter()
         .enumerate()
-        .filter_map(|(i, h)| (h.rank() == rank).then_some(hand_strings[i]))
+        .collect();
+    pairs.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(Ordering::Equal));
+    pairs
+        .iter()
+        .map(|&(index, _)| hands[index])
+        .take(count_winners(&pairs))
         .collect()
 }
 

@@ -76,6 +76,14 @@ struct Hand {
     cards: HashSet<Card>,
 }
 
+impl Hand {
+    /// Returns the rank of this hand, as defined on Wikipedia:
+    /// https://en.wikipedia.org/wiki/List_of_poker_hands
+    fn rank(&self) -> u8 {
+        todo!()
+    }
+}
+
 impl FromStr for Hand {
     type Err = String;
 
@@ -90,8 +98,20 @@ impl FromStr for Hand {
 ///
 /// Note the type signature: this function should return _the same_ reference to
 /// the winning hand(s) as were passed in, not reconstructed strings which happen to be equal.
-pub fn winning_hands<'a>(hands: &[&'a str]) -> Vec<&'a str> {
-    unimplemented!("Out of {:?}, which hand wins?", hands)
+pub fn winning_hands<'a>(hand_strings: &[&'a str]) -> Vec<&'a str> {
+    let hands: Vec<Hand> = hand_strings
+        .iter()
+        .map(|s| s.parse().expect("bad hand"))
+        .collect();
+    let rank = match hands.iter().map(|h| h.rank()).max() {
+        Some(rank) => rank,
+        None => return Vec::new(),
+    };
+    hands
+        .iter()
+        .enumerate()
+        .filter_map(|(i, h)| (h.rank() == rank).then_some(hand_strings[i]))
+        .collect()
 }
 
 fn main() {}

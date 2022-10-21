@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use std::str::FromStr;
 
 #[derive(Eq, Hash, Ord, PartialEq, PartialOrd)]
-enum Rank {
+enum CardRank {
     Number(u8),
     Jack,
     Queen,
@@ -11,16 +11,16 @@ enum Rank {
     Ace,
 }
 
-impl FromStr for Rank {
+impl FromStr for CardRank {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "J" => Ok(Rank::Jack),
-            "Q" => Ok(Rank::Queen),
-            "K" => Ok(Rank::King),
-            "A" => Ok(Rank::Ace),
-            _ => Ok(Rank::Number(s.parse().map_err(|_| "bad rank")?)),
+            "J" => Ok(CardRank::Jack),
+            "Q" => Ok(CardRank::Queen),
+            "K" => Ok(CardRank::King),
+            "A" => Ok(CardRank::Ace),
+            _ => Ok(CardRank::Number(s.parse().map_err(|_| "bad rank")?)),
         }
     }
 }
@@ -49,7 +49,7 @@ impl FromStr for Suit {
 
 #[derive(Eq, Hash, PartialEq)]
 struct Card {
-    rank: Rank,
+    rank: CardRank,
     suit: Suit,
 }
 
